@@ -37,6 +37,7 @@ namespace ImageConverter
         {
             this.Hide();
             IsImageShowed = false;
+            ImageSizeChange_TrackBar.Value = ImageSizeChange_TrackBar.Minimum;
         }
         
         #endregion
@@ -98,6 +99,8 @@ namespace ImageConverter
             }
 
         }
+       
+
         private void ImageShowed_Shown(object sender, EventArgs e)
         {
             this.IsImageShowed = true;

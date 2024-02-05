@@ -19,7 +19,7 @@ namespace ImageConverter
             set
             {
                 onePixel = value;
-                if(IsImgConverted && !IsFirstConvertation) 
+                if (IsImgConverted && !IsFirstConvertation)
                     IsImgConverted = false;
             }
         }
@@ -55,16 +55,13 @@ namespace ImageConverter
         {
             if (IsFirstConvertation) { IsFirstConvertation = false; } //если конвертации еще не было
             IsImgConverted = true;
-         
+
             Bitmap BTemp = new Bitmap(this.targetImage);
             Bitmap targetBmp = BTemp.Clone(new Rectangle(0, 0, BTemp.Width, BTemp.Height), PixelFormat.Format32bppArgb); //Подходит только один формат
 
 
-            using var getFrom = new BmpPixelSnoop(targetBmp); 
+            using var getFrom = new BmpPixelSnoop(targetBmp);
             using var toChange = new BmpPixelSnoop(this.converted_bitmap);
-          
-
-
 
             // int pixInH = height / PixelSize;
             // int pixInW = width / PixelSize;
@@ -94,59 +91,74 @@ namespace ImageConverter
             }
 
         }
-
-
-        private void CalculateExtraPixCount(ref int extraPix)
+        private int CalculateExtraPixCount(int extraPix, int max, int pixSize)
         {
-            int pixCount = this.imageWidth / PixelationLevel;
-            int t1 = pixCount * PixelationLevel;
-            extraPix = this.imageWidth - t1;
+            return max - PixelationLevel * pixSize;
+        }
+        private int CalculatePixSize(int max)
+        {
+            int pixCount = max / PixelationLevel;
 
-            PixelationLevel = this.imageWidth / pixCount;
-            int t2 = PixelationLevel * pixCount;
-            extraPix = this.imageWidth - t2;
-           
+            return max / pixCount;
         }
 
         public void ConvertWithPixLevel()
         {
+            int PixelSizeW = CalculatePixSize(imageWidth);
+            int PixelSizeH = CalculatePixSize(imageHeight);
+
+            int exPixCountW = 0; //Количество лишних пикселей в ширине (которые не могут сформировать целый пиксель по заданным размерам)
+            exPixCountW = imageWidth - PixelSizeW * (imageWidth / PixelationLevel);
+
+            int exPixCountH = 0; //Лишние пиксели в высоте
+            exPixCountH = imageHeight - PixelSizeH * (imageHeight / PixelationLevel);
+
             if (IsFirstConvertation) { IsFirstConvertation = false; } //если конвертации еще не было
             IsImgConverted = true;
 
             Bitmap BTemp = new Bitmap(this.targetImage);
             Bitmap targetBmp = BTemp.Clone(new Rectangle(0, 0, BTemp.Width, BTemp.Height), PixelFormat.Format32bppArgb); //Подходит только один формат
 
-            int exPixCountW = 0;
-            CalculateExtraPixCount(ref exPixCountW);
-           
-
             using var getFrom = new BmpPixelSnoop(targetBmp);
             using var toChange = new BmpPixelSnoop(this.converted_bitmap);
 
-            int t1 = -2;
+            int indentW = -2; //Отступ для пикселя в ширину (делаем некоторые пиксели немного больше)
+            int indentH = -2; //Отступ в высоту. -2 нужно для проверки, есть ли отступ 
 
-            int PixelSizeW = PixelationLevel;
-            if(exPixCountW!=0)
+
+            if (exPixCountW != 0)
             {
                 PixelSizeW++;
-                t1 = exPixCountW;
+                indentW = exPixCountW;
             }
-           // int PixelSizeH = PixelSize;
 
-            for (int yPos = 0; yPos < imageHeight; yPos += PixelationLevel)
+            if (exPixCountH != 0)
+            {
+                PixelSizeH++;
+                indentH = exPixCountH;
+            }
+
+
+            for (int yPos = 0; yPos < imageHeight; yPos += PixelSizeH)
             {
 
                 for (int xPos = 0; xPos < imageWidth; xPos += PixelSizeW)
-                {         
-                    if (t1 == 0)
+                {
+                    if (indentW == 0)
                     {
                         PixelSizeW--;
-                        t1 = -1;
+                        indentW = -1;
+                    }
+
+                    if (indentH == 0)
+                    {
+                        PixelSizeH--;
+                        indentH = -1;
                     }
                     // Get a pixel from the input bitmap
                     var p1 = getFrom.GetPixel(xPos, yPos);
 
-                    for (int yCurr = 0; yCurr < PixelationLevel && yCurr + yPos < imageHeight; yCurr++)
+                    for (int yCurr = 0; yCurr <= PixelSizeH && yCurr + yPos < imageHeight; yCurr++)
                     {
                         for (int xCurr = 0; xCurr <= PixelSizeW && xCurr + xPos < imageWidth; xCurr++)
                         {
@@ -156,19 +168,28 @@ namespace ImageConverter
                         }
 
                     }
-                    if (t1 > 0)
+                    if (indentW > 0)
                     {
-                        t1--;
+                        indentW--;
                     }
                 }
-                if (t1 != -2)
+                if (indentH > 0)
                 {
-                    t1 = exPixCountW;
+                    indentH--;
+                }
+                if (indentW != -2)
+                {
+                    indentW = exPixCountW;
                     PixelSizeW++;
                 }
 
             }
+            if (indentH != -2)
+            {
+                indentH = exPixCountH;
+                PixelSizeH++;
+            }
+
         }
-      
     }
 }

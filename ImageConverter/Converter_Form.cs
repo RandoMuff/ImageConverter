@@ -19,16 +19,20 @@ namespace ImageConverter
         Pixelator pixelisator;
         ImageViewer_Form ShowedImage;
 
-        int LeftIndent, TopIndent; //отступы по бокам 
+        private int LeftIndent, TopIndent; //отступы по бокам 
 
         public Converter_Form()
         {
             InitializeComponent();
-            this.SetStyle(ControlStyles.ResizeRedraw, true);
             pixelisator = new Pixelator();
-            pixelisator.PixelSize = (int)PixSize_numericUpDown.Value;
+            pixelisator.PixelSize = (int)PixSize_numericUpDown.Value; //Размер пикселя равен минимальному 
+            pixLvl_comboBox.SelectedIndex = pixLvl_comboBox.SelectionStart; //Комбобокс показывает свой первый элемент
+            pixelisator.PixelationLevel = int.Parse(pixLvl_comboBox.Text); //Уровень пикселизации равен первому элементу
+
             this.BackColor = Color.FromArgb(128, 128, 220);
             ShowedImage = new ImageViewer_Form();
+
+            this.MinimumSize = new Size(exitButton.Width * 6, exitButton.Height + menuExit_button.Height);
 
             LeftIndent = 30; TopIndent = 20;
         }
@@ -45,13 +49,15 @@ namespace ImageConverter
 
             if (pixelisator.getFileName() != "") //Если картинка не пустая
             {
-                this.showPicture_rButton.Enabled = true; //Разрешить ее просмотреть
-                this.FileName_Label.Text = pixelisator.getFileName(); //Показываем название файла на форме
-                this.Time_Label.Text = ""; //Сбрасываем время выполнения
-                if (pixelisator.IsImgConverted) //Если другая картинка была конвертирована
+                showPicture_rButton.Enabled = true; //Разрешить ее просмотреть
+                FileName_Label.Text = pixelisator.getFileName(); //Показываем название файла на форме
+                Time_Label.Text = ""; //Сбрасываем время выполнения
+                if (!pixelisator.IsImgConverted) //Если картинка не конвертирована
                 {
-                    this.download_roundedButton.Enabled = false; //Не разрешаем скачивать неконвертированную картинку
-                    this.toggleSwitch.Checked = false; //Новая картинка не была конвертирована, поэтому сбрасываем свитч "Использовать конвертированную картинку
+                    StartConverting_Button.Enabled = true;
+                    download_roundedButton.Enabled = false; //Не разрешаем скачивать неконвертированную картинку
+                    toggleSwitch.Checked = false; //Новая картинка не была конвертирована, поэтому сбрасываем свитч "Использовать конвертированную картинку
+                    toggleSwitch.Enabled = false;
 
                 }
 
@@ -62,32 +68,32 @@ namespace ImageConverter
         {
             if (pixelisator.IsImgConverted)//Если изображение конвертированно или это первая конвертация
             {
-                MessageBox.Show("Сначала выберите файл", "Ошибка"); //Выдаем ошибку
+                MessageBox.Show("Изображение уже конвертировано", "Ошибка"); //Выдаем ошибку
             }
             else
             {
                 var timer = new Stopwatch(); //Считаем время выполнения конвертации
                 timer.Start();
 
-                if (pixelisator.PixelationLevel != 0) //Если выбран уровень пикселизации
-                {
-                    await Task.Run(() => pixelisator.ConvertWithPixLevel());
-                }
-                else
+                if (Pixels_tabControl.SelectedTab == tabPage1)  //если выбран кастом пиксель
                 {
                     await Task.Run(() => pixelisator.Convert());
+                }
+                else //Если выбран уровень пикселизации
+                {
+                    await Task.Run(() => pixelisator.ConvertWithPixLevel());
                 }
 
                 timer.Stop();
 
-                this.Time_Label.Text = $"Время конвертации:  {timer.ElapsedMilliseconds} мс"; //Показываем время конвертации на форме
+                Time_Label.Text = $"Время конвертации:  {timer.ElapsedMilliseconds} мс"; //Показываем время конвертации на форме
 
-                this.download_roundedButton.Enabled = true; //Разрешаем скачивание
-                this.toggleSwitch.Enabled = true; //Разрешаем использовать конвертированное изображение 
+                download_roundedButton.Enabled = true; //Разрешаем скачивание
+                toggleSwitch.Enabled = true; //Разрешаем использовать конвертированное изображение 
 
                 if (!toggleSwitch.Checked)
                 {
-                    this.toggleSwitch.Checked = true;
+                    toggleSwitch.Checked = true;
                 }
 
             }
@@ -105,13 +111,13 @@ namespace ImageConverter
 
         private void showPicture_rButton_Click(object sender, EventArgs e)
         {
-            if (!ShowedImage.IsImageShowed)
+            if (!ShowedImage.IsImageShowed) //Если окно с картинкой еще не открыто
             {
                 ShowedImage.setImage(pixelisator.targetImage);
                 ShowedImage.Show();
                 //ShowedImage.Resize_Image();
             }
-            else
+            else //Если открыто, то просто показываем его. Чтобы не открывать несколько одинаковых окон
             {
                 ShowedImage.BringToFront();
             }
@@ -137,28 +143,19 @@ namespace ImageConverter
             }
         }
 
-        private void Pixels_tabControl_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (this.Pixels_tabControl.SelectedTab == tabPage1)
-            {
-                this.pixelisator.PixelationLevel = 0;//Если переключаемся на авто пикселизацию, сбрасываем уровень пикселизации
-                this.pixLvl_comboBox.SelectedIndex = -1;
-            }
-        }
-
         private void pixLvl_comboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (this.pixLvl_comboBox.SelectedIndex != -1)
+            if (pixLvl_comboBox.SelectedIndex != -1)
             {
-                this.pixelisator.PixelationLevel = int.Parse(pixLvl_comboBox.Text);
+                pixelisator.PixelationLevel = int.Parse(pixLvl_comboBox.Text);
             }
 
         }
         private void pixLvl_comboBox_TextChanged(object sender, EventArgs e)
         {
-            if (this.pixLvl_comboBox.Text != "")
+            if (pixLvl_comboBox.Text != "")
             {
-                this.pixelisator.PixelationLevel = int.Parse(pixLvl_comboBox.Text);
+                pixelisator.PixelationLevel = int.Parse(pixLvl_comboBox.Text);
             }
 
         }
@@ -183,7 +180,7 @@ namespace ImageConverter
 
             exitButton.Location = new Point(this.Width - exitButton.Width, exitButton.Location.Y);
 
-            ButtonMax.Location = new Point(this.Width - ButtonMax.Width * 2 - 6,ButtonMax.Location.Y);
+            ButtonMax.Location = new Point(this.Width - ButtonMax.Width * 2 - 6, ButtonMax.Location.Y);
 
             Button_Min.Location = new Point(this.Width - Button_Min.Width * 3 - 12, Button_Min.Location.Y);
 
@@ -191,8 +188,8 @@ namespace ImageConverter
 
             download_groupBox.Location = new Point(LeftIndent, left_panel.Height - TopIndent - download_groupBox.Height - down_panel.Height);
 
-            Pixels_tabControl.Location = new Point(LeftIndent, download_groupBox.Location.Y/2 - TopIndent*2);
-            toggle_groupBox.Location = Pixels_tabControl.Location;
+            Pixels_tabControl.Location = new Point(LeftIndent, download_groupBox.Location.Y / 2 - TopIndent * 2);
+            toggle_groupBox.Location = new Point(Pixels_tabControl.Location.X + Pixels_tabControl.Width, Pixels_tabControl.Location.Y);
 
         }
     }

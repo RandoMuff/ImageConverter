@@ -34,7 +34,6 @@ namespace ImageConverter
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Converter_Form));
             MovableArea = new Panel();
-            AppName_label = new Label();
             Button_Min = new Button();
             exitButton = new Button();
             ButtonMax = new Button();
@@ -47,8 +46,8 @@ namespace ImageConverter
             left_panel = new Panel();
             menuExit_button = new RButton();
             download_groupBox = new GroupBox();
-            download_roundedButton = new RButton();
             showPicture_rButton = new RButton();
+            download_roundedButton = new RButton();
             OpenFile_Button = new Button();
             useConvertedImg_label = new Label();
             toggle_groupBox = new GroupBox();
@@ -77,7 +76,6 @@ namespace ImageConverter
             // MovableArea
             // 
             MovableArea.BackColor = System.Drawing.Color.LightSlateGray;
-            MovableArea.Controls.Add(AppName_label);
             MovableArea.Controls.Add(Button_Min);
             MovableArea.Controls.Add(exitButton);
             MovableArea.Controls.Add(ButtonMax);
@@ -86,17 +84,6 @@ namespace ImageConverter
             MovableArea.Name = "MovableArea";
             MovableArea.Size = new System.Drawing.Size(920, 36);
             MovableArea.TabIndex = 4;
-            // 
-            // AppName_label
-            // 
-            AppName_label.AutoSize = true;
-            AppName_label.BackColor = System.Drawing.Color.Transparent;
-            AppName_label.Font = new System.Drawing.Font("Corbel", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            AppName_label.Location = new System.Drawing.Point(0, 0);
-            AppName_label.Name = "AppName_label";
-            AppName_label.Size = new System.Drawing.Size(197, 33);
-            AppName_label.TabIndex = 18;
-            AppName_label.Text = "Image Converter";
             // 
             // Button_Min
             // 
@@ -154,6 +141,7 @@ namespace ImageConverter
             // 
             StartConverting_Button.BackColor = System.Drawing.Color.SteelBlue;
             StartConverting_Button.Cursor = Cursors.Hand;
+            StartConverting_Button.Enabled = false;
             StartConverting_Button.FlatStyle = FlatStyle.Flat;
             StartConverting_Button.Font = new System.Drawing.Font("Corbel", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             StartConverting_Button.Location = new System.Drawing.Point(6, 26);
@@ -251,26 +239,6 @@ namespace ImageConverter
             download_groupBox.TabIndex = 21;
             download_groupBox.TabStop = false;
             // 
-            // download_roundedButton
-            // 
-            download_roundedButton.BackColor = System.Drawing.Color.MediumSlateBlue;
-            download_roundedButton.BackgroundColor = System.Drawing.Color.MediumSlateBlue;
-            download_roundedButton.BorderColor = System.Drawing.Color.DarkSlateBlue;
-            download_roundedButton.BorderRadius = 20;
-            download_roundedButton.BorderSize = 1;
-            download_roundedButton.Enabled = false;
-            download_roundedButton.FlatStyle = FlatStyle.Flat;
-            download_roundedButton.Font = new System.Drawing.Font("Corbel", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            download_roundedButton.ForeColor = System.Drawing.Color.White;
-            download_roundedButton.Location = new System.Drawing.Point(222, 26);
-            download_roundedButton.Name = "download_roundedButton";
-            download_roundedButton.Size = new System.Drawing.Size(129, 86);
-            download_roundedButton.TabIndex = 26;
-            download_roundedButton.Text = "Скачать";
-            download_roundedButton.TextColor = System.Drawing.Color.White;
-            download_roundedButton.UseVisualStyleBackColor = false;
-            download_roundedButton.Click += download_roundedButton_Click;
-            // 
             // showPicture_rButton
             // 
             showPicture_rButton.BackColor = System.Drawing.Color.MediumSlateBlue;
@@ -290,6 +258,26 @@ namespace ImageConverter
             showPicture_rButton.TextColor = System.Drawing.Color.White;
             showPicture_rButton.UseVisualStyleBackColor = false;
             showPicture_rButton.Click += showPicture_rButton_Click;
+            // 
+            // download_roundedButton
+            // 
+            download_roundedButton.BackColor = System.Drawing.Color.MediumSlateBlue;
+            download_roundedButton.BackgroundColor = System.Drawing.Color.MediumSlateBlue;
+            download_roundedButton.BorderColor = System.Drawing.Color.DarkSlateBlue;
+            download_roundedButton.BorderRadius = 20;
+            download_roundedButton.BorderSize = 1;
+            download_roundedButton.Enabled = false;
+            download_roundedButton.FlatStyle = FlatStyle.Flat;
+            download_roundedButton.Font = new System.Drawing.Font("Corbel", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            download_roundedButton.ForeColor = System.Drawing.Color.White;
+            download_roundedButton.Location = new System.Drawing.Point(222, 26);
+            download_roundedButton.Name = "download_roundedButton";
+            download_roundedButton.Size = new System.Drawing.Size(129, 86);
+            download_roundedButton.TabIndex = 26;
+            download_roundedButton.Text = "Скачать";
+            download_roundedButton.TextColor = System.Drawing.Color.White;
+            download_roundedButton.UseVisualStyleBackColor = false;
+            download_roundedButton.Click += download_roundedButton_Click;
             // 
             // OpenFile_Button
             // 
@@ -321,9 +309,9 @@ namespace ImageConverter
             toggle_groupBox.Controls.Add(useConvertedImg_label);
             toggle_groupBox.Controls.Add(toggleSwitch);
             toggle_groupBox.FlatStyle = FlatStyle.Popup;
-            toggle_groupBox.Location = new System.Drawing.Point(302, 205);
+            toggle_groupBox.Location = new System.Drawing.Point(292, 169);
             toggle_groupBox.Name = "toggle_groupBox";
-            toggle_groupBox.Size = new System.Drawing.Size(371, 173);
+            toggle_groupBox.Size = new System.Drawing.Size(371, 222);
             toggle_groupBox.TabIndex = 24;
             toggle_groupBox.TabStop = false;
             // 
@@ -355,7 +343,6 @@ namespace ImageConverter
             Pixels_tabControl.SelectedIndex = 0;
             Pixels_tabControl.Size = new System.Drawing.Size(267, 222);
             Pixels_tabControl.TabIndex = 25;
-            Pixels_tabControl.SelectedIndexChanged += Pixels_tabControl_SelectedIndexChanged;
             // 
             // tabPage1
             // 
@@ -400,6 +387,7 @@ namespace ImageConverter
             pixLvl_comboBox.AutoCompleteSource = AutoCompleteSource.ListItems;
             pixLvl_comboBox.BackColor = System.Drawing.Color.Gainsboro;
             pixLvl_comboBox.Cursor = Cursors.Hand;
+            pixLvl_comboBox.DisplayMember = "1";
             pixLvl_comboBox.DropDownStyle = ComboBoxStyle.DropDownList;
             pixLvl_comboBox.FlatStyle = FlatStyle.Popup;
             pixLvl_comboBox.Font = new System.Drawing.Font("Segoe UI", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
@@ -467,7 +455,6 @@ namespace ImageConverter
             Text = "Form1";
             SizeChanged += Form_Size_Changed;
             MovableArea.ResumeLayout(false);
-            MovableArea.PerformLayout();
             down_panel.ResumeLayout(false);
             down_panel.PerformLayout();
             left_panel.ResumeLayout(false);
@@ -500,7 +487,6 @@ namespace ImageConverter
         private System.Windows.Forms.Panel down_panel;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Panel left_panel;
-        private System.Windows.Forms.Label AppName_label;
         private RButton download_roundedButton;
         private RButton showPicture_rButton;
         private System.Windows.Forms.GroupBox download_groupBox;
